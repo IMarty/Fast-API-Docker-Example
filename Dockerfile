@@ -23,7 +23,7 @@ FROM python:3.10-slim-bullseye AS final
 
 # Set a non-root user for security
 # Create a system group and user with no home directory
-RUN addgroup --system appgroup && adduser --system --group appgroup appuser
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Set the working directory
 WORKDIR /app
