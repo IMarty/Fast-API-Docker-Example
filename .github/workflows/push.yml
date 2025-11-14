@@ -1,0 +1,23 @@
+name: Push Docker Image
+# This workflow is triggered on any pull request
+on:
+  pull_request:
+    branches:
+      - main  # Or whatever your main branch is called
+jobs:
+    push-to-repo:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Code
+                uses: action/checkout@v3
+            -   name: Login to Docker Hub
+                uses: docker/login-action@v2 
+                with:
+                    username: imarty
+                    password: dckr_pat_1tlFdKErCZ8UHRRUJjf6gA2pmn8
+            -   name: Build and Push
+                uses: docker/build-push-action@v4
+                with:
+                    context: .
+                    push: true
+                    tags: imarty/${{github.event.repository.name}}:latest
