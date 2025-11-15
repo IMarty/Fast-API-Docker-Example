@@ -1,22 +1,3 @@
-# ---- Build Stage ----
-# Use a full-featured Python image to build our dependencies
-FROM python:3.10-bullseye AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Install build dependencies
-RUN pip install --upgrade pip setuptools wheel
-
-# Copy only the files needed to install dependencies
-# This leverages Docker cache more effectively
-COPY requirements.txt .
-
-# Install runtime dependencies into a "virtual environment"
-# We will copy this entire directory to the final image
-RUN pip install --no-cache-dir --prefix="/app/venv" \
-    -r requirements.txt
-
 # ---- Final Stage ----
 # Use a minimal, slim Python image for the final container
 FROM python:3.10-slim-bullseye AS final
@@ -26,22 +7,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install all dependencies directly to system Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Set a non-root user for security
 # Create a system group and user with no home directory
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Set the working directory
-WORKDIR /app
-
 # Create logs directory with proper permissions
 RUN mkdir -p /app/logs && chown -R appuser:appgroup /app/logs
-
-# Copy the installed Python packages from the builder stage
-COPY --from=builder /app/venv /app/venv
-
-# Add venv to PATH so Python can find packages
-ENV PATH=/app/venv/bin:$PATH \
-    PYTHONPATH=/app/venv/lib/python3.10/site-packages:$PYTHONPATH
 
 # Copy the application code
 COPY . .
