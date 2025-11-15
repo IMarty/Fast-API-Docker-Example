@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+typing_extensions
 redis
 pytest
 httpx

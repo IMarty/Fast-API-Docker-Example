@@ -14,9 +14,7 @@ COPY requirements.txt .
 
 # Install runtime dependencies into a "virtual environment"
 # We will copy this entire directory to the final image
-# Add typing_extensions explicitly for uvicorn compatibility
 RUN pip install --no-cache-dir --prefix="/app/venv" \
-    typing_extensions \
     -r requirements.txt
 
 # ---- Final Stage ----
@@ -39,7 +37,11 @@ WORKDIR /app
 RUN mkdir -p /app/logs && chown -R appuser:appgroup /app/logs
 
 # Copy the installed Python packages from the builder stage
-COPY --from=builder /app/venv /usr/local
+COPY --from=builder /app/venv /app/venv
+
+# Add venv to PATH so Python can find packages
+ENV PATH=/app/venv/bin:$PATH \
+    PYTHONPATH=/app/venv/lib/python3.10/site-packages:$PYTHONPATH
 
 # Copy the application code
 COPY . .
