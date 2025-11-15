@@ -1,0 +1,69 @@
+---
+# Ingress Controller - NGINX
+# This ingress controller exposes the FastAPI application to external traffic
+# Requires NGINX Ingress Controller to be installed in the cluster
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fastapi-ingress
+  namespace: fastapi-app
+  annotations:
+    # NGINX Ingress Controller annotations
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    # Enable HTTPS redirect (requires cert-manager for TLS)
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    # Request body size
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  labels:
+    app: fastapi-app
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: fastapi.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fastapi-app
+            port:
+              number: 80
+  # Uncomment below for TLS/HTTPS (requires cert-manager)
+  # tls:
+  # - secretName: fastapi-tls
+  #   hosts:
+  #   - fastapi.local
+---
+# Alternative: Ingress with TLS (requires cert-manager)
+# Uncomment to use this configuration instead of the one above
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: fastapi-ingress-tls
+#   namespace: fastapi-app
+#   annotations:
+#     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+#     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+# spec:
+#   ingressClassName: nginx
+#   tls:
+#   - secretName: fastapi-tls
+#     hosts:
+#     - fastapi.example.com
+#   rules:
+#   - host: fastapi.example.com
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: fastapi-app
+#             port:
+#               number: 80

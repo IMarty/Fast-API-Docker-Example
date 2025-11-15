@@ -1,0 +1,12 @@
+---
+# FastAPI Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-config
+  namespace: fastapi-app
+data:
+  # Redis host - service DNS name within the cluster
+  REDIS_HOST: "redis-db"
+  # Log configuration
+  LOG_LEVEL: "INFO"

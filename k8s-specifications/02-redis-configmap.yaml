@@ -1,0 +1,11 @@
+---
+# ConfigMap for Redis configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: fastapi-app
+data:
+  # Basic Redis configuration
+  maxmemory: "256mb"
+  maxmemory-policy: "allkeys-lru"

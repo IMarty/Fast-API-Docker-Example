@@ -1,0 +1,9 @@
+---
+# Kubernetes Namespace for the FastAPI application
+# This provides logical isolation for the application resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fastapi-app
+  labels:
+    name: fastapi-app

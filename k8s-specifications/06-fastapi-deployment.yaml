@@ -1,0 +1,100 @@
+---
+# FastAPI Application Deployment
+# This deployment runs the FastAPI application with multiple replicas for high availability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+  namespace: fastapi-app
+  labels:
+    app: fastapi-app
+    tier: frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: fastapi-app
+  template:
+    metadata:
+      labels:
+        app: fastapi-app
+        tier: frontend
+    spec:
+      # Pod Disruption Budget can be added for high availability
+      affinity:
+        # Spread pods across different nodes when possible
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - fastapi-app
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: fastapi
+        # Replace with your actual Docker image
+        # Format: registry/image:tag
+        image: imarty/fast-api-docker-example:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        env:
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: fastapi-config
+              key: REDIS_HOST
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: fastapi-config
+              key: LOG_LEVEL
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: app-logs
+          mountPath: /app/logs
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        # Security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+      volumes:
+      - name: app-logs
+        emptyDir: {}
+      # Security context for the pod
+      securityContext:
+        fsGroup: 1000
