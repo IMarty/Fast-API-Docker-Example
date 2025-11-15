@@ -1,12 +1,14 @@
 name: Push Docker Image
-# This workflow is triggered on any pull request
+# This workflow is triggered on pull requests, pushes to main, and tag creation
 on:
     pull_request:
         branches:
-            - main  # Or whatever your main branch is called
+            - main
     push:
         branches:
-            - main  # Or whatever your main branch is called
+            - main
+        tags:
+            - 'v*'  # Trigger on version tags like v1.0.0
 jobs:
     build-and-test:
         # The workflow will run on the latest Ubuntu virtual machine
@@ -39,6 +41,7 @@ jobs:
     push-to-repo:
         runs-on: ubuntu-latest
         needs: build-and-test
+        if: github.event_name == 'push'  # Only run on push events, not pull requests
         steps:
             -   name: Checkout Code
                 uses: actions/checkout@v3
@@ -67,6 +70,7 @@ jobs:
                 with:
                     context: .
                     push: true
+                    platforms: linux/amd64,linux/arm64
                     tags: |
                         imarty/fast-api-docker-example:${{ steps.version.outputs.version }}
                         imarty/fast-api-docker-example:latest
