@@ -10,7 +10,7 @@ metadata:
     app: fastapi-app
     tier: frontend
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -46,7 +46,7 @@ spec:
         image: imarty/fast-api-docker-example:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8000
           name: http
         env:
         - name: REDIS_HOST
@@ -61,8 +61,8 @@ spec:
               key: LOG_LEVEL
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
+            memory: "256Mi"
+            cpu: "250m"
           limits:
             memory: "512Mi"
             cpu: "500m"
@@ -73,16 +73,16 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 80
-          initialDelaySeconds: 30
+            port: 8000
+          initialDelaySeconds: 40
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
             path: /
-            port: 80
-          initialDelaySeconds: 10
+            port: 8000
+          initialDelaySeconds: 20
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 2

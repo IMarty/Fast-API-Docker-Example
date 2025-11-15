@@ -32,7 +32,7 @@ spec:
           service:
             name: fastapi-app
             port:
-              number: 80
+              number: 8000
   # Uncomment below for TLS/HTTPS (requires cert-manager)
   # tls:
   # - secretName: fastapi-tls
