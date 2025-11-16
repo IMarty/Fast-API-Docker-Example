@@ -9,16 +9,18 @@ import redis.exceptions
 logging.basicConfig(filename='/app/logs/app.log', level=logging.INFO)
 
 #Redis - Reaching another container
+r = None
 try:
-    r= redis.Redis(host=os.getenv("REDIS_HOST","redis-db"), port=6379, db=0, socket_connect_timeout=1, decode_responses=True)
+    r = redis.Redis(host=os.getenv("REDIS_HOST","redis-db"), port=6379, db=0, socket_connect_timeout=1, decode_responses=True)
     r.ping()
     print("Database reached")
     logging.info("Database reached")
     if not r.exists('hits'):
         r.set("hits", 0)
 except redis.exceptions.ConnectionError as e:
-    print("Unable to reach Database")
-    logging.error("Unable to reach Database")
+    print("Unable to reach Database - app will continue without Redis")
+    logging.error(f"Unable to reach Database: {e}")
+    r = None
 
 app = FastAPI()
 @app.get('/')
