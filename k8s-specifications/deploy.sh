@@ -78,9 +78,9 @@ print_warning "Checking for Metrics Server..."
 if kubectl get deployment metrics-server -n kube-system &> /dev/null 2>&1; then
     print_success "Metrics Server is installed"
 else
-    print_warning "Metrics Server not found. Installing..."
-    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-    print_success "Metrics Server installed"
+    print_warning "Metrics Server not found."
+    print_warning "Note: GKE Autopilot manages system namespaces and includes Metrics Server by default."
+    print_warning "If you need a custom metrics server, use a separate namespace."
 fi
 
 # Deployment
